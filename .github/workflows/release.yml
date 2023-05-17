@@ -1,0 +1,14 @@
+name: release
+
+on:
+  push:
+    tags: [v*]
+  workflow_dispatch:
+
+jobs:
+  docker-release:
+    uses: lrstanley/.github/.github/workflows/docker-release.yml@master
+    secrets:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    with:
+      scan: false

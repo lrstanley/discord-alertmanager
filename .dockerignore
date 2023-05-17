@@ -1,0 +1,15 @@
+*.log
+~*
+*.tmp
+*.txt
+dist
+*.test
+*.prof
+*.conf
+*.toml
+*.db
+.git
+bin
+**/.env
+**/*.md
+discord-*

@@ -1,0 +1,17 @@
+*.log
+~*
+*.tmp
+tmp
+*.txt
+dist
+*.test
+*.prof
+*.conf
+*.yml
+*.yaml
+!.goreleaser.yml
+!docker-compose.yaml
+!/.github/**
+discord-*
+bin
+**/.env
