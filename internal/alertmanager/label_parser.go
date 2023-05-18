@@ -65,7 +65,10 @@ func (l *LabelEntry) String() string {
 	return l.Name + l.Matcher + strconv.Quote(l.Value)
 }
 
-func ParseLabels(input string) (matchers []*almodels.Matcher, err error) {
+// ParseLabels parses a string of labels into a list of matchers. If allowDuplicates
+// is true, then duplicate matchers will be allowed, otherwise the last seen value
+// will be used.
+func ParseLabels(input string, allowDuplicates bool) (matchers []*almodels.Matcher, err error) {
 	var ast *ParseResults
 
 	ast, err = parser.ParseString("", input)
@@ -97,10 +100,60 @@ func ParseLabels(input string) (matchers []*almodels.Matcher, err error) {
 			break
 		}
 
-		if !found {
+		if !found || allowDuplicates {
 			matchers = append(matchers, matcher)
 		}
 	}
 
 	return matchers, nil
+}
+
+// Convert matcher key-value pairs. If pad is true, then the output will be
+// padded to be aligned with each other (keys and equal/regex/negation).
+func MatcherToString(matchers []*almodels.Matcher, pad bool) (out []string) {
+	var nameLen, equalLen int
+
+	for _, m := range matchers {
+		if len(*m.Name) > nameLen {
+			nameLen = len(*m.Name)
+		}
+
+		if !*m.IsEqual || *m.IsRegex {
+			equalLen = 2
+		} else if equalLen == 0 {
+			equalLen = 1
+		}
+	}
+
+	for _, m := range matchers {
+		s := *m.Name
+
+		if pad {
+			s += strings.Repeat(" ", nameLen-len(*m.Name)) + " "
+		}
+
+		if *m.IsEqual {
+			s += "="
+		} else {
+			s += "!"
+		}
+
+		equal := 1
+		if *m.IsRegex {
+			s += "~"
+			equal = 2
+		} else if !*m.IsEqual {
+			s += "="
+			equal = 2
+		}
+
+		if pad {
+			s += strings.Repeat(" ", (equalLen+1)-equal)
+		}
+
+		s += strconv.Quote(*m.Value)
+		out = append(out, s)
+	}
+
+	return out
 }

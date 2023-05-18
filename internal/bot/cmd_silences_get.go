@@ -7,11 +7,13 @@ package bot
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/andersfylling/disgord"
 	"github.com/apex/log"
 	"github.com/go-openapi/strfmt"
+	"github.com/lrstanley/discord-alertmanager/internal/alertmanager"
 	"github.com/prometheus/alertmanager/api/v2/client/silence"
 	almodels "github.com/prometheus/alertmanager/api/v2/models"
 )
@@ -47,10 +49,7 @@ func (b *Bot) silenceEmbed(s disgord.Session, alertSilence *almodels.GettableSil
 	fields := []*disgord.EmbedField{}
 
 	// All key-value label pairs.
-	var description string
-	for _, matcher := range alertSilence.Matchers {
-		description += fmt.Sprintf("%s = %s\n", *matcher.Name, *matcher.Value)
-	}
+	description := strings.Join(alertmanager.MatcherToString(alertSilence.Matchers, true), "\n") + "\n"
 
 	fields = append(fields, &disgord.EmbedField{
 		Name:   ":memo: Comment",

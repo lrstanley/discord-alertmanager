@@ -20,7 +20,7 @@ func (b *Bot) silenceAdd(s disgord.Session, h *disgord.InteractionCreate) {
 	comment, _ := optionsHasChild[string](h.Data.Options[0].Options, "comment")
 	filter, _ := optionsHasChild[string](h.Data.Options[0].Options, "filter")
 
-	matchers, err := alertmanager.ParseLabels(filter)
+	matchers, err := alertmanager.ParseLabels(filter, true)
 	if err != nil {
 		b.responseError(s, h, "Invalid filter provided", err)
 		return
