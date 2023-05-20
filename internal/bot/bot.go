@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/andersfylling/disgord"
@@ -18,6 +19,8 @@ import (
 	"github.com/lrstanley/discord-alertmanager/internal/models"
 	"github.com/prometheus/alertmanager/api/v2/client/silence"
 )
+
+const httpRequestTimeout = 5 * time.Second
 
 type Bot struct {
 	ctx    context.Context
@@ -93,7 +96,7 @@ func (b *Bot) Run(ctx context.Context) error {
 	<-ctx.Done()
 	b.logger.Info("shutting down")
 	_ = b.client.Gateway().Disconnect()
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond) //nolint:gomnd
 
 	return nil
 }
@@ -108,10 +111,12 @@ func (b *Bot) onReady() {
 
 // onInteractionCreate is called when a user interacts with the bots slash commands.
 func (b *Bot) onInteractionCreate(s disgord.Session, h *disgord.InteractionCreate) {
-	fmt.Printf("% #v\n", pretty.Formatter(*h))
+	fmt.Printf("% #v\n", pretty.Formatter(*h)) // TODO: replace with proper logging?
 
 	switch h.Data.Name {
-	case "silences":
+	case "silence alert": // Message commands.
+		b.silenceAddFromMessage(s, h)
+	case "silences": // Application commands.
 		switch h.Data.Options[0].Name {
 		case "add":
 			b.silenceAdd(s, h)
@@ -137,22 +142,26 @@ func (b *Bot) responseError(s disgord.Session, h *disgord.InteractionCreate, tit
 		"id":         h.ID,
 	}).WithError(originalErr).Error(title)
 
+	//nolint:errorlint,revive,stylecheck
 	switch terr := originalErr.(type) {
 	case *silence.GetSilenceNotFound:
 		originalErr = errors.New("Alertmanager was unable to find the requested silence. Please check your inputs and try again.")
 	case *runtime.APIError:
 		switch terr.Code {
-		case 400:
+		case http.StatusBadRequest:
 			originalErr = fmt.Errorf(
 				"Request was invalid, likely due to an incorrectly specified parameter. Please check your inputs and try again. (status %d)",
 				terr.Code,
 			)
-		case 404:
+		case http.StatusNotFound:
 			originalErr = fmt.Errorf(
 				"Alertmanager was unable to find the requested resource. Please check your inputs and try again. (status %d)",
 				terr.Code,
 			)
-		case 500, 502, 503, 504, 522:
+		case http.StatusInternalServerError,
+			http.StatusBadGateway,
+			http.StatusServiceUnavailable,
+			http.StatusGatewayTimeout:
 			originalErr = fmt.Errorf(
 				"Alertmanager is currently unavailable. Please try again later. (status %d)",
 				terr.Code,

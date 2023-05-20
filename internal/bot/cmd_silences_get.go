@@ -23,7 +23,7 @@ func (b *Bot) silenceGet(s disgord.Session, h *disgord.InteractionCreate) {
 
 	getParams := &silence.GetSilenceParams{}
 	getParams.SetContext(b.ctx)
-	getParams.SetTimeout(5 * time.Second)
+	getParams.SetTimeout(httpRequestTimeout)
 	getParams.SetSilenceID(strfmt.UUID(id))
 	resp, err := b.al.Silence.GetSilence(getParams, b.al.HandleAuth)
 	if err != nil {
@@ -93,7 +93,7 @@ func (b *Bot) silenceEmbed(s disgord.Session, alertSilence *almodels.GettableSil
 		if id := disgord.ParseSnowflakeString(match[0][1]); !id.IsZero() {
 			user, err := s.User(id).Get()
 			if err == nil {
-				iconURL, err = user.AvatarURL(64, true)
+				iconURL, err = user.AvatarURL(64, true) //nolint:gomnd
 			}
 			if err != nil {
 				b.logger.WithFields(log.Fields{

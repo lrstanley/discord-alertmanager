@@ -6,7 +6,6 @@ package bot
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/andersfylling/disgord"
 	"github.com/go-openapi/strfmt"
@@ -20,7 +19,7 @@ func (b *Bot) silenceRemove(s disgord.Session, h *disgord.InteractionCreate) {
 	// to others in the same channel what was removed.
 	getParams := &silence.GetSilenceParams{}
 	getParams.SetContext(b.ctx)
-	getParams.SetTimeout(5 * time.Second)
+	getParams.SetTimeout(httpRequestTimeout)
 	getParams.SetSilenceID(strfmt.UUID(id))
 	resp, err := b.al.Silence.GetSilence(getParams, b.al.HandleAuth)
 	if err != nil {
@@ -30,7 +29,7 @@ func (b *Bot) silenceRemove(s disgord.Session, h *disgord.InteractionCreate) {
 
 	deleteParams := &silence.DeleteSilenceParams{}
 	deleteParams.SetContext(b.ctx)
-	deleteParams.SetTimeout(5 * time.Second)
+	deleteParams.SetTimeout(httpRequestTimeout)
 	deleteParams.SetSilenceID(strfmt.UUID(id))
 
 	_, err = b.al.Silence.DeleteSilence(deleteParams, b.al.HandleAuth)

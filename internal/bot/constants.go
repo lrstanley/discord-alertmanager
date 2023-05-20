@@ -17,7 +17,14 @@ const (
 	colorWarning = 0xFEE75C
 )
 
+// nolint:gomnd
 var commands = []*disgord.CreateApplicationCommand{
+	{
+		Name:                     "silence alert",
+		Type:                     disgord.ApplicationCommandMessage,
+		DMPermission:             models.Ptr(false),
+		DefaultMemberPermissions: models.Ptr(disgord.PermissionBit(0)),
+	},
 	{
 		Name:        "silences",
 		Description: "Manage alert silences",

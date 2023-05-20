@@ -12,6 +12,7 @@ import (
 	"github.com/alecthomas/participle/v2/lexer"
 	"github.com/lrstanley/discord-alertmanager/internal/models"
 	almodels "github.com/prometheus/alertmanager/api/v2/models"
+	"golang.org/x/exp/slices"
 )
 
 var (
@@ -28,6 +29,7 @@ var (
 		participle.Unquote("StringSingle", "StringDouble"),
 		participle.UseLookahead(2),
 	)
+	excludeLabelNames = []string{"alertstate"}
 )
 
 // EBNF equivalent:
@@ -114,6 +116,10 @@ func MatcherToString(matchers []*almodels.Matcher, pad bool) (out []string) {
 	var nameLen, equalLen int
 
 	for _, m := range matchers {
+		if slices.Contains(excludeLabelNames, *m.Name) {
+			continue
+		}
+
 		if len(*m.Name) > nameLen {
 			nameLen = len(*m.Name)
 		}
@@ -126,6 +132,10 @@ func MatcherToString(matchers []*almodels.Matcher, pad bool) (out []string) {
 	}
 
 	for _, m := range matchers {
+		if slices.Contains(excludeLabelNames, *m.Name) {
+			continue
+		}
+
 		s := *m.Name
 
 		if pad {

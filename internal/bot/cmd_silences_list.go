@@ -5,8 +5,6 @@
 package bot
 
 import (
-	"time"
-
 	"github.com/andersfylling/disgord"
 	"github.com/prometheus/alertmanager/api/v2/client/silence"
 )
@@ -18,7 +16,7 @@ func (b *Bot) silenceList(s disgord.Session, h *disgord.InteractionCreate) {
 
 	params := &silence.GetSilencesParams{}
 	params.SetContext(b.ctx)
-	params.SetTimeout(5 * time.Second)
+	params.SetTimeout(httpRequestTimeout)
 
 	if filter != "" {
 		params.SetFilter([]string{filter})
