@@ -5,6 +5,7 @@
 package alertmanager
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 
@@ -30,6 +31,8 @@ var (
 		participle.UseLookahead(2),
 	)
 	excludeLabelNames = []string{"alertstate"}
+
+	ErrNoLabelsProvided = errors.New("no filter/matchers provided")
 )
 
 // EBNF equivalent:
@@ -105,6 +108,10 @@ func ParseLabels(input string, allowDuplicates bool) (matchers []*almodels.Match
 		if !found || allowDuplicates {
 			matchers = append(matchers, matcher)
 		}
+	}
+
+	if len(matchers) == 0 {
+		return nil, ErrNoLabelsProvided
 	}
 
 	return matchers, nil
