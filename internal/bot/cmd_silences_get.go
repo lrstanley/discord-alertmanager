@@ -18,7 +18,7 @@ import (
 	almodels "github.com/prometheus/alertmanager/api/v2/models"
 )
 
-func (b *Bot) silenceGet(s disgord.Session, h *disgord.InteractionCreate) {
+func (b *Bot) silenceGetFromCommand(s disgord.Session, h *disgord.InteractionCreate) {
 	id, _ := optionsHasChild[string](h.Data.Options[0].Options, "id")
 
 	getParams := &silence.GetSilenceParams{}

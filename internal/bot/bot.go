@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/andersfylling/disgord"
@@ -71,7 +72,7 @@ func New(ctx context.Context, config models.ConfigDiscord, al *alertmanager.Clie
 // Run starts the bot. It will block until the context is canceled, in which it will
 // then gracefully shutdown, disconnecting from Discord.
 func (b *Bot) Run(ctx context.Context) error {
-	authorizationUrl, err := b.client.BotAuthorizeURL(disgord.PermissionUseSlashCommands, []string{
+	authorizationURL, err := b.client.BotAuthorizeURL(disgord.PermissionUseSlashCommands, []string{
 		"bot",
 		"applications.commands",
 	})
@@ -79,7 +80,7 @@ func (b *Bot) Run(ctx context.Context) error {
 		b.logger.WithError(err).Error("failed to get bot auth url")
 		return err
 	}
-	b.logger.WithField("url", authorizationUrl).Info("please visit the following url to add the bot to your server")
+	b.logger.WithField("url", authorizationURL).Info("please visit the following url to add the bot to your server")
 
 	b.self, err = b.client.CurrentUser().Get()
 	if err != nil {
@@ -113,25 +114,53 @@ func (b *Bot) onReady() {
 func (b *Bot) onInteractionCreate(s disgord.Session, h *disgord.InteractionCreate) {
 	fmt.Printf("% #v\n", pretty.Formatter(*h)) // TODO: replace with proper logging?
 
+	// Static custom IDs.
+	switch h.Data.CustomID {
+	case "modal-add":
+		b.silenceAddFromModal(s, h)
+		return
+	}
+
+	// Custom IDs that have a specific prefix, and provided arguments.
+	if i := strings.Index(h.Data.CustomID, "/"); i != -1 {
+		id := h.Data.CustomID[:i]
+		args := strings.Split(h.Data.CustomID[i+1:], "/")
+
+		switch id {
+		case "silence-remove":
+			b.silenceRemoveFromCallback(s, h, args)
+			return
+		}
+	}
+
 	switch h.Data.Name {
 	case "silence alert": // Message commands.
 		b.silenceAddFromMessage(s, h)
 	case "silences": // Application commands.
 		switch h.Data.Options[0].Name {
 		case "add":
-			b.silenceAdd(s, h)
+			b.silenceAddFromCommand(s, h)
+			return
 		case "get":
-			b.silenceGet(s, h)
+			b.silenceGetFromCommand(s, h)
+			return
 		case "list":
-			b.silenceList(s, h)
+			b.silenceListFromCommand(s, h)
+			return
 		case "remove":
-			b.silenceRemove(s, h)
-		default:
-			b.logger.WithField("name", h.Data.Name).Warn("unknown interaction")
+			b.silenceRemoveFromCommand(s, h)
+			return
 		}
-	default:
-		b.logger.WithField("name", h.Data.Name).Warn("unknown interaction")
 	}
+
+	b.logger.WithFields(log.Fields{
+		"guild_id":   h.GuildID,
+		"channel_id": h.ChannelID,
+		"user_id":    h.Member.User.ID,
+		"message_id": h.ID,
+		"command":    h.Data.Name,
+		"custom_id":  h.Data.CustomID,
+	}).Warn("unknown interaction")
 }
 
 func (b *Bot) responseError(s disgord.Session, h *disgord.InteractionCreate, title string, originalErr error) {
@@ -139,7 +168,7 @@ func (b *Bot) responseError(s disgord.Session, h *disgord.InteractionCreate, tit
 		"guild_id":   h.GuildID,
 		"channel_id": h.ChannelID,
 		"user_id":    h.Member.User.ID,
-		"id":         h.ID,
+		"message_id": h.ID,
 	}).WithError(originalErr).Error(title)
 
 	//nolint:errorlint,revive,stylecheck

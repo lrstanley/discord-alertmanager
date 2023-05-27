@@ -5,6 +5,7 @@
 package bot
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/andersfylling/disgord"
@@ -12,9 +13,7 @@ import (
 	"github.com/prometheus/alertmanager/api/v2/client/silence"
 )
 
-func (b *Bot) silenceRemove(s disgord.Session, h *disgord.InteractionCreate) {
-	id, _ := optionsHasChild[string](h.Data.Options[0].Options, "id")
-
+func (b *Bot) silenceRemove(s disgord.Session, h *disgord.InteractionCreate, id string) (ok bool) { //nolint:unparam
 	// First get the silence, so we can show it in the response to make it clear
 	// to others in the same channel what was removed.
 	getParams := &silence.GetSilenceParams{}
@@ -24,7 +23,12 @@ func (b *Bot) silenceRemove(s disgord.Session, h *disgord.InteractionCreate) {
 	resp, err := b.al.Silence.GetSilence(getParams, b.al.HandleAuth)
 	if err != nil {
 		b.responseError(s, h, "An error occurred while fetching silence", err)
-		return
+		return false
+	}
+
+	if *resp.Payload.Status.State == "expired" {
+		b.responseError(s, h, fmt.Sprintf("Unable to remove silence `%s`", id), errors.New("silence is already expired"))
+		return false
 	}
 
 	deleteParams := &silence.DeleteSilenceParams{}
@@ -35,7 +39,7 @@ func (b *Bot) silenceRemove(s disgord.Session, h *disgord.InteractionCreate) {
 	_, err = b.al.Silence.DeleteSilence(deleteParams, b.al.HandleAuth)
 	if err != nil {
 		b.responseError(s, h, "An error occurred while deleting silence", err)
-		return
+		return false
 	}
 
 	silenceEmbed := b.silenceEmbed(s, resp.Payload)
@@ -52,5 +56,24 @@ func (b *Bot) silenceRemove(s disgord.Session, h *disgord.InteractionCreate) {
 	})
 	if err != nil {
 		b.logger.WithError(err).Error("failed to respond to interaction")
+		return false
 	}
+
+	return true
+}
+
+func (b *Bot) silenceRemoveFromCallback(s disgord.Session, h *disgord.InteractionCreate, args []string) {
+	if len(args) < 1 {
+		return
+	}
+
+	// TODO: remove original message and/or update to disable the button?
+
+	_ = b.silenceRemove(s, h, args[0])
+}
+
+func (b *Bot) silenceRemoveFromCommand(s disgord.Session, h *disgord.InteractionCreate) {
+	id, _ := optionsHasChild[string](h.Data.Options[0].Options, "id")
+
+	_ = b.silenceRemove(s, h, id)
 }

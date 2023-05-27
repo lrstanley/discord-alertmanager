@@ -9,7 +9,7 @@ import (
 	"github.com/prometheus/alertmanager/api/v2/client/silence"
 )
 
-func (b *Bot) silenceList(s disgord.Session, h *disgord.InteractionCreate) {
+func (b *Bot) silenceListFromCommand(s disgord.Session, h *disgord.InteractionCreate) {
 	filter, _ := optionsHasChild[string](h.Data.Options[0].Options, "filter")
 	includeExpired, _ := optionsHasChild[bool](h.Data.Options[0].Options, "include-expired")
 	expiredOnly, _ := optionsHasChild[bool](h.Data.Options[0].Options, "expired-only")
