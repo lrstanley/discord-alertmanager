@@ -33,34 +33,23 @@ var commands = []*disgord.CreateApplicationCommand{
 		// Require admin by default, and let the owner add roles/channels as necessary.
 		DefaultMemberPermissions: models.Ptr(disgord.PermissionBit(0)),
 		Options: []*disgord.ApplicationCommandOption{
-			// {
-			// 	Name:        "test_option",
-			// 	Type:        disgord.OptionTypeString,
-			// 	Description: "testing options",
-			// 	Choices: []*disgord.ApplicationCommandOptionChoice{
-			// 		{
-			// 			Name:  "test_choice",
-			// 			Value: "test_val",
-			// 		},
-			// 	},
-			// },
 			{
 				Name:        "add",
-				Description: "Add a new silence",
+				Description: "Add a new silence (no arguments will open a popup)",
 				Type:        disgord.OptionTypeSubCommand,
 				Options: []*disgord.ApplicationCommandOption{
 					{
 						Name:        "comment",
 						Description: "Comment or description to go along with the silence",
 						Type:        disgord.OptionTypeString,
-						Required:    true,
+						Required:    false,
 						MinLength:   4,
 					},
 					{
 						Name:        "filter",
 						Description: "Filter silences by label-value pairs. e.g. alertname=\"foo\",bar=\"baz\"",
 						Type:        disgord.OptionTypeString,
-						Required:    true,
+						Required:    false,
 						MinLength:   4,
 					},
 					{
@@ -89,6 +78,47 @@ var commands = []*disgord.CreateApplicationCommand{
 						Required:    true,
 						MinLength:   36,
 						MaxLength:   36,
+					},
+				},
+			},
+			{
+				Name:        "edit",
+				Description: "Edit an existing silence (no arguments will open a popup)",
+				Type:        disgord.OptionTypeSubCommand,
+				Options: []*disgord.ApplicationCommandOption{
+					{
+						Name:        "id",
+						Description: "Silence ID to edit",
+						Type:        disgord.OptionTypeString,
+						Required:    true,
+						MinLength:   36,
+						MaxLength:   36,
+					},
+					{
+						Name:        "comment",
+						Description: "Comment or description to go along with the silence",
+						Type:        disgord.OptionTypeString,
+						Required:    false,
+						MinLength:   4,
+					},
+					{
+						Name:        "filter",
+						Description: "Filter silences by label-value pairs. e.g. alertname=\"foo\",bar=\"baz\"",
+						Type:        disgord.OptionTypeString,
+						Required:    false,
+						MinLength:   4,
+					},
+					{
+						Name:        "at",
+						Description: "Time at which the silence should start -- defaults to now",
+						Type:        disgord.OptionTypeString,
+						Required:    false,
+					},
+					{
+						Name:        "until",
+						Description: "Time at which the silence should end -- defaults to 2 hours from now",
+						Type:        disgord.OptionTypeString,
+						Required:    false,
 					},
 				},
 			},

@@ -28,6 +28,8 @@ var (
 )
 
 type addConfig struct {
+	ID string // Only used when editing.
+
 	Comment  string
 	Matchers string
 	StartsAt string
@@ -44,17 +46,19 @@ func (m *addConfig) validate() error {
 	}
 
 	if m.StartsAt == "" {
-		return errors.New("startsAt is required")
+		m.StartsAt = "TODO"
+		// return errors.New("startsAt is required")
 	}
 
 	if m.EndsAt == "" {
-		return errors.New("endsAt is required")
+		m.EndsAt = "TODO"
+		// return errors.New("endsAt is required")
 	}
 
 	return nil
 }
 
-func (b *Bot) addSilence(s disgord.Session, h *disgord.InteractionCreate, config *addConfig) (ok bool) { //nolint:unparam
+func (b *Bot) addOrUpdateSilence(s disgord.Session, h *disgord.InteractionCreate, config *addConfig) (ok bool) { //nolint:unparam
 	if err := config.validate(); err != nil {
 		b.responseError(s, h, "Invalid silence configuration provided", err)
 		return false
@@ -70,6 +74,7 @@ func (b *Bot) addSilence(s disgord.Session, h *disgord.InteractionCreate, config
 	createParams.SetContext(b.ctx)
 	createParams.SetTimeout(httpRequestTimeout)
 	createParams.SetSilence(&almodels.PostableSilence{
+		ID: config.ID,
 		Silence: almodels.Silence{
 			Comment:   models.Ptr(config.Comment),
 			CreatedBy: models.Ptr(fmt.Sprintf("<@%d> (%s)", h.Member.User.ID, h.Member.User.Username)),
@@ -81,7 +86,7 @@ func (b *Bot) addSilence(s disgord.Session, h *disgord.InteractionCreate, config
 
 	createResp, err := b.al.Silence.PostSilences(createParams, b.al.HandleAuth)
 	if err != nil {
-		b.responseError(s, h, "An error occurred while creating silence", err)
+		b.responseError(s, h, "An error occurred while creating/updating silence", err)
 		return false
 	}
 
@@ -99,16 +104,27 @@ func (b *Bot) addSilence(s disgord.Session, h *disgord.InteractionCreate, config
 
 	silenceEmbed := b.silenceEmbed(s, resp.Payload)
 	silenceEmbed.Color = colorSuccess
-	silenceEmbed.Title = fmt.Sprintf("Silence created: %s", *resp.Payload.ID)
+	if config.ID == "" {
+		silenceEmbed.Title = fmt.Sprintf("Silence created: %s", *resp.Payload.ID)
+	} else {
+		silenceEmbed.Title = fmt.Sprintf("Silence updated: %s", *resp.Payload.ID)
+	}
 
 	err = s.SendInteractionResponse(b.ctx, h, &disgord.CreateInteractionResponse{
 		Type: disgord.InteractionCallbackChannelMessageWithSource,
 		Data: &disgord.CreateInteractionResponseData{
-			Embeds:          []*disgord.Embed{silenceEmbed},
 			AllowedMentions: &disgord.AllowedMentions{Parse: []string{"users"}},
+			Embeds:          []*disgord.Embed{silenceEmbed},
 			Components: []*disgord.MessageComponent{{
 				Type: disgord.MessageComponentActionRow,
 				Components: []*disgord.MessageComponent{
+					{
+						Type:     disgord.MessageComponentButton,
+						Label:    "edit",
+						Style:    disgord.Primary,
+						CustomID: fmt.Sprintf("silence-edit/%s", createResp.Payload.SilenceID),
+						Disabled: false,
+					},
 					{
 						Type:     disgord.MessageComponentButton,
 						Label:    "remove",
@@ -135,7 +151,12 @@ func (b *Bot) silenceAddFromCommand(s disgord.Session, h *disgord.InteractionCre
 	config.StartsAt, _ = optionsHasChild[string](h.Data.Options, "at")
 	config.EndsAt, _ = optionsHasChild[string](h.Data.Options, "until")
 
-	_ = b.addSilence(s, h, config)
+	if config.Comment == "" || config.Matchers == "" {
+		b.modalAdd(s, h, "modal-add", "Create silence", config)
+		return
+	}
+
+	_ = b.addOrUpdateSilence(s, h, config)
 }
 
 func (b *Bot) silenceAddFromMessage(s disgord.Session, h *disgord.InteractionCreate) {
@@ -173,8 +194,6 @@ func (b *Bot) silenceAddFromMessage(s disgord.Session, h *disgord.InteractionCre
 
 			b.modalAdd(s, h, "modal-add", "Create silence", &addConfig{
 				Matchers: strings.Join(alertmanager.MatcherToString(matchers, false), "\n"),
-				StartsAt: "TODO",
-				EndsAt:   "TODO",
 			})
 			return //nolint:staticcheck
 		}
@@ -183,14 +202,14 @@ func (b *Bot) silenceAddFromMessage(s disgord.Session, h *disgord.InteractionCre
 	b.responseError(s, h, "No alerts found in message", errors.New("Please use the `/silences add` command instead.")) //nolint:revive,stylecheck
 }
 
-func (b *Bot) silenceAddFromModal(s disgord.Session, h *disgord.InteractionCreate) {
+func (b *Bot) silenceAddFromModalCallback(s disgord.Session, h *disgord.InteractionCreate, _ string, _ []string) {
 	config := &addConfig{}
 	config.Comment, _ = componentsHasChild[string](h.Data.Components, "comment")
 	config.Matchers, _ = componentsHasChild[string](h.Data.Components, "matcher")
 	config.StartsAt, _ = componentsHasChild[string](h.Data.Components, "startsAt")
 	config.EndsAt, _ = componentsHasChild[string](h.Data.Components, "endsAt")
 
-	_ = b.addSilence(s, h, config)
+	_ = b.addOrUpdateSilence(s, h, config)
 }
 
 func (b *Bot) modalAdd(s disgord.Session, h *disgord.InteractionCreate, customID, title string, config *addConfig) {

@@ -112,25 +112,30 @@ func (b *Bot) onReady() {
 
 // onInteractionCreate is called when a user interacts with the bots slash commands.
 func (b *Bot) onInteractionCreate(s disgord.Session, h *disgord.InteractionCreate) {
-	fmt.Printf("% #v\n", pretty.Formatter(*h)) // TODO: replace with proper logging?
+	b.logger.WithField("event", fmt.Sprintf("% #v", pretty.Formatter(*h))).Debug("received interaction create event")
 
-	// Static custom IDs.
-	switch h.Data.CustomID { //nolint:gocritic
-	case "modal-add":
-		b.silenceAddFromModal(s, h)
-		return
-	}
+	customID := h.Data.CustomID
+	var args []string
 
 	// Custom IDs that have a specific prefix, and provided arguments.
 	if i := strings.Index(h.Data.CustomID, "/"); i != -1 {
-		id := h.Data.CustomID[:i]
-		args := strings.Split(h.Data.CustomID[i+1:], "/")
+		customID = h.Data.CustomID[:i]
+		args = strings.Split(h.Data.CustomID[i+1:], "/")
+	}
 
-		switch id { //nolint:gocritic
-		case "silence-remove":
-			b.silenceRemoveFromCallback(s, h, id, args)
-			return
-		}
+	switch customID {
+	case "modal-add":
+		b.silenceAddFromModalCallback(s, h, customID, args)
+		return
+	case "modal-edit":
+		b.silenceEditFromModalCallback(s, h, customID, args)
+		return
+	case "silence-edit":
+		b.silenceEditFromCallback(s, h, customID, args)
+		return
+	case "silence-remove":
+		b.silenceRemoveFromCallback(s, h, customID, args)
+		return
 	}
 
 	switch h.Data.Name {
@@ -144,6 +149,9 @@ func (b *Bot) onInteractionCreate(s disgord.Session, h *disgord.InteractionCreat
 			return
 		case "get":
 			b.silenceGetFromCommand(s, h)
+			return
+		case "edit":
+			b.silenceEditFromCommand(s, h)
 			return
 		case "list":
 			b.silenceListFromCommand(s, h)

@@ -81,7 +81,7 @@ func (b *Bot) silenceRemoveFromCallback(s disgord.Session, h *disgord.Interactio
 }
 
 func (b *Bot) silenceRemoveFromCommand(s disgord.Session, h *disgord.InteractionCreate) {
-	id, _ := optionsHasChild[string](h.Data.Options[0].Options, "id")
+	id, _ := optionsHasChild[string](h.Data.Options, "id")
 
 	_ = b.silenceRemove(s, h, id)
 }

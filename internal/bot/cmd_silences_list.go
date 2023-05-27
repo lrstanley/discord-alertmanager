@@ -10,9 +10,9 @@ import (
 )
 
 func (b *Bot) silenceListFromCommand(s disgord.Session, h *disgord.InteractionCreate) {
-	filter, _ := optionsHasChild[string](h.Data.Options[0].Options, "filter")
-	includeExpired, _ := optionsHasChild[bool](h.Data.Options[0].Options, "include-expired")
-	expiredOnly, _ := optionsHasChild[bool](h.Data.Options[0].Options, "expired-only")
+	filter, _ := optionsHasChild[string](h.Data.Options, "filter")
+	includeExpired, _ := optionsHasChild[bool](h.Data.Options, "include-expired")
+	expiredOnly, _ := optionsHasChild[bool](h.Data.Options, "expired-only")
 
 	params := &silence.GetSilencesParams{}
 	params.SetContext(b.ctx)
