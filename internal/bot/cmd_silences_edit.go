@@ -12,6 +12,7 @@ import (
 	"github.com/andersfylling/disgord"
 	"github.com/go-openapi/strfmt"
 	"github.com/lrstanley/discord-alertmanager/internal/alertmanager"
+	"github.com/lrstanley/discord-alertmanager/internal/models"
 	"github.com/prometheus/alertmanager/api/v2/client/silence"
 )
 
@@ -30,7 +31,7 @@ func (b *Bot) silenceEditFromCallback(s disgord.Session, h *disgord.InteractionC
 		return
 	}
 
-	b.modalAdd(s, h, fmt.Sprintf("modal-edit/%s", args[0]), "Update silence", &addConfig{
+	b.modalAdd(s, h, fmt.Sprintf("modal-edit/%s/%d", args[0], h.Message.ID), "Update silence", &addConfig{
 		ID:       args[0],
 		Comment:  *resp.Payload.Comment,
 		Matchers: strings.Join(alertmanager.MatcherToString(resp.Payload.Matchers, false), "\n"),
@@ -97,6 +98,11 @@ func (b *Bot) silenceEditFromModalCallback(s disgord.Session, h *disgord.Interac
 		return
 	}
 
+	var messageID disgord.Snowflake
+	if len(args) > 1 {
+		messageID = disgord.ParseSnowflakeString(args[1])
+	}
+
 	config := &addConfig{}
 	config.ID = args[0]
 	config.Comment, _ = componentsHasChild[string](h.Data.Components, "comment")
@@ -104,7 +110,13 @@ func (b *Bot) silenceEditFromModalCallback(s disgord.Session, h *disgord.Interac
 	config.StartsAt, _ = componentsHasChild[string](h.Data.Components, "startsAt")
 	config.EndsAt, _ = componentsHasChild[string](h.Data.Components, "endsAt")
 
-	// TODO: If successful, remove the source (outdated) message if it exists.
-
-	_ = b.addOrUpdateSilence(s, h, config)
+	if b.addOrUpdateSilence(s, h, config) && !messageID.IsZero() {
+		// Remove all of the buttons from the previous message.
+		_, err := b.client.Channel(h.ChannelID).Message(messageID).Update(&disgord.UpdateMessage{
+			Components: models.Ptr([]*disgord.MessageComponent{}),
+		})
+		if err != nil {
+			b.logger.WithError(err).Error("failed to update message")
+		}
+	}
 }

@@ -54,3 +54,7 @@ func (c *Client) HandleAuth(op *runtime.ClientOperation) {
 func (c *Client) URL() string {
 	return strings.TrimSuffix(c.config.URL, "/")
 }
+
+func (c *Client) SilenceURL(id string) string {
+	return fmt.Sprintf("%s/#/silences/%s", c.URL(), id)
+}

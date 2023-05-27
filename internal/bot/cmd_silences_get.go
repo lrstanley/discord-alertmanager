@@ -41,7 +41,7 @@ func (b *Bot) silenceGetFromCommand(s disgord.Session, h *disgord.InteractionCre
 				Components: []*disgord.MessageComponent{
 					{
 						Type:     disgord.MessageComponentButton,
-						Label:    "edit", // TODO: add emojis.
+						Label:    "edit",
 						Style:    disgord.Primary,
 						CustomID: fmt.Sprintf("silence-edit/%s", id),
 						Disabled: false,
@@ -134,7 +134,7 @@ func (b *Bot) silenceEmbed(s disgord.Session, alertSilence *almodels.GettableSil
 		Color:       color,
 		Title:       fmt.Sprintf("%s: %s", titlePrefix, *alertSilence.ID),
 		Description: "```\n" + description + "```",
-		URL:         fmt.Sprintf("%s/#/silences/%s", b.al.URL(), *alertSilence.ID),
+		URL:         b.al.SilenceURL(*alertSilence.ID),
 		Fields:      fields,
 		Timestamp:   disgord.Time{Time: time.Time(*alertSilence.UpdatedAt)},
 		Footer: &disgord.EmbedFooter{

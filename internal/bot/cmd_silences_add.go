@@ -108,6 +108,8 @@ func (b *Bot) addOrUpdateSilence(s disgord.Session, h *disgord.InteractionCreate
 		silenceEmbed.Title = fmt.Sprintf("Silence created: %s", *resp.Payload.ID)
 	} else {
 		silenceEmbed.Title = fmt.Sprintf("Silence updated: %s", *resp.Payload.ID)
+		// TODO: may have to remove [%s](%s) depending on if Discord continues to support markdown format.
+		silenceEmbed.Description = fmt.Sprintf("replaces silence: [%s](%s)\n", config.ID, b.al.SilenceURL(config.ID)) + silenceEmbed.Description
 	}
 
 	err = s.SendInteractionResponse(b.ctx, h, &disgord.CreateInteractionResponse{
