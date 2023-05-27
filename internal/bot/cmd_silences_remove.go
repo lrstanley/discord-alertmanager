@@ -62,14 +62,22 @@ func (b *Bot) silenceRemove(s disgord.Session, h *disgord.InteractionCreate, id 
 	return true
 }
 
-func (b *Bot) silenceRemoveFromCallback(s disgord.Session, h *disgord.InteractionCreate, args []string) {
+func (b *Bot) silenceRemoveFromCallback(s disgord.Session, h *disgord.InteractionCreate, _ string, args []string) {
 	if len(args) < 1 {
 		return
 	}
 
-	// TODO: remove original message and/or update to disable the button?
-
-	_ = b.silenceRemove(s, h, args[0])
+	if b.silenceRemove(s, h, args[0]) {
+		if updateButtonComponent(h.Message.Components, h.Data.CustomID, "removed", disgord.Danger, true) {
+			_, err := b.client.Channel(h.ChannelID).Message(h.Message.ID).Update(&disgord.UpdateMessage{
+				Components: &h.Message.Components,
+			})
+			if err != nil {
+				b.logger.WithError(err).Error("failed to update message")
+				return
+			}
+		}
+	}
 }
 
 func (b *Bot) silenceRemoveFromCommand(s disgord.Session, h *disgord.InteractionCreate) {

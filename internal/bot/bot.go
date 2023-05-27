@@ -115,7 +115,7 @@ func (b *Bot) onInteractionCreate(s disgord.Session, h *disgord.InteractionCreat
 	fmt.Printf("% #v\n", pretty.Formatter(*h)) // TODO: replace with proper logging?
 
 	// Static custom IDs.
-	switch h.Data.CustomID {
+	switch h.Data.CustomID { //nolint:gocritic
 	case "modal-add":
 		b.silenceAddFromModal(s, h)
 		return
@@ -126,9 +126,9 @@ func (b *Bot) onInteractionCreate(s disgord.Session, h *disgord.InteractionCreat
 		id := h.Data.CustomID[:i]
 		args := strings.Split(h.Data.CustomID[i+1:], "/")
 
-		switch id {
+		switch id { //nolint:gocritic
 		case "silence-remove":
-			b.silenceRemoveFromCallback(s, h, args)
+			b.silenceRemoveFromCallback(s, h, id, args)
 			return
 		}
 	}
@@ -136,6 +136,7 @@ func (b *Bot) onInteractionCreate(s disgord.Session, h *disgord.InteractionCreat
 	switch h.Data.Name {
 	case "silence alert": // Message commands.
 		b.silenceAddFromMessage(s, h)
+		return
 	case "silences": // Application commands.
 		switch h.Data.Options[0].Name {
 		case "add":
