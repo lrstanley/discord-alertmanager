@@ -6,6 +6,5 @@ services:
     image: ghcr.io/lrstanley/discord-alertmanager:latest
     restart: unless-stopped
     environment:
-      - DRY_RUN=true
       - LOG_LEVEL=debug
       # TODO
