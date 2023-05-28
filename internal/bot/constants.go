@@ -54,13 +54,13 @@ var commands = []*disgord.CreateApplicationCommand{
 					},
 					{
 						Name:        "at",
-						Description: "Time at which the silence should start -- defaults to now",
+						Description: "Time at which the silence should start, defaults to now (RFC3339 or 1h30m, -1h30m, etc)",
 						Type:        disgord.OptionTypeString,
 						Required:    false,
 					},
 					{
 						Name:        "until",
-						Description: "Time at which the silence should end -- defaults to 2 hours from now",
+						Description: "Time at which the silence should end, defaults to 4 hours from now (RFC3339 or 1h30m, -1h30m, etc)",
 						Type:        disgord.OptionTypeString,
 						Required:    false,
 					},
@@ -110,13 +110,13 @@ var commands = []*disgord.CreateApplicationCommand{
 					},
 					{
 						Name:        "at",
-						Description: "Time at which the silence should start -- defaults to now",
+						Description: "Time at which the silence should start, defaults to now (RFC3339 or 1h30m, -1h30m, etc)",
 						Type:        disgord.OptionTypeString,
 						Required:    false,
 					},
 					{
 						Name:        "until",
-						Description: "Time at which the silence should end -- defaults to 2 hours from now",
+						Description: "Time at which the silence should end, defaults to 4 hours from now (RFC3339 or 1h30m, -1h30m, etc)",
 						Type:        disgord.OptionTypeString,
 						Required:    false,
 					},

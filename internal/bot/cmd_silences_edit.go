@@ -32,11 +32,11 @@ func (b *Bot) silenceEditFromCallback(s disgord.Session, h *disgord.InteractionC
 	}
 
 	b.modalAdd(s, h, fmt.Sprintf("modal-edit/%s/%d", args[0], h.Message.ID), "Update silence", &addConfig{
-		ID:       args[0],
-		Comment:  *resp.Payload.Comment,
-		Matchers: strings.Join(alertmanager.MatcherToString(resp.Payload.Matchers, false), "\n"),
-		StartsAt: time.Until(time.Time(*resp.Payload.StartsAt)).Round(time.Minute).String(),
-		EndsAt:   time.Until(time.Time(*resp.Payload.EndsAt)).Round(time.Minute).String(),
+		id:       args[0],
+		comment:  *resp.Payload.Comment,
+		matchers: strings.Join(alertmanager.MatcherToString(resp.Payload.Matchers, false), "\n"),
+		startsAt: time.Until(time.Time(*resp.Payload.StartsAt)).Round(time.Minute).String(),
+		endsAt:   time.Until(time.Time(*resp.Payload.EndsAt)).Round(time.Minute).String(),
 	})
 }
 
@@ -54,32 +54,32 @@ func (b *Bot) silenceEditFromCommand(s disgord.Session, h *disgord.InteractionCr
 	}
 
 	config := &addConfig{
-		ID:       id,
-		Comment:  *resp.Payload.Comment,
-		Matchers: strings.Join(alertmanager.MatcherToString(resp.Payload.Matchers, false), "\n"),
-		StartsAt: time.Until(time.Time(*resp.Payload.StartsAt)).Round(time.Minute).String(),
-		EndsAt:   time.Until(time.Time(*resp.Payload.EndsAt)).Round(time.Minute).String(),
+		id:       id,
+		comment:  *resp.Payload.Comment,
+		matchers: strings.Join(alertmanager.MatcherToString(resp.Payload.Matchers, false), "\n"),
+		startsAt: time.Until(time.Time(*resp.Payload.StartsAt)).Round(time.Minute).String(),
+		endsAt:   time.Until(time.Time(*resp.Payload.EndsAt)).Round(time.Minute).String(),
 	}
 
 	wantsModal := true
 
 	if v, ok := optionsHasChild[string](h.Data.Options, "comment"); ok {
-		config.Comment = v
+		config.comment = v
 		wantsModal = false
 	}
 
 	if v, ok := optionsHasChild[string](h.Data.Options, "filter"); ok {
-		config.Matchers = v
+		config.matchers = v
 		wantsModal = false
 	}
 
 	if v, ok := optionsHasChild[string](h.Data.Options, "at"); ok {
-		config.StartsAt = v
+		config.startsAt = v
 		wantsModal = false
 	}
 
 	if v, ok := optionsHasChild[string](h.Data.Options, "until"); ok {
-		config.EndsAt = v
+		config.endsAt = v
 		wantsModal = false
 	}
 
@@ -104,11 +104,11 @@ func (b *Bot) silenceEditFromModalCallback(s disgord.Session, h *disgord.Interac
 	}
 
 	config := &addConfig{}
-	config.ID = args[0]
-	config.Comment, _ = componentsHasChild[string](h.Data.Components, "comment")
-	config.Matchers, _ = componentsHasChild[string](h.Data.Components, "matcher")
-	config.StartsAt, _ = componentsHasChild[string](h.Data.Components, "startsAt")
-	config.EndsAt, _ = componentsHasChild[string](h.Data.Components, "endsAt")
+	config.id = args[0]
+	config.comment, _ = componentsHasChild[string](h.Data.Components, "comment")
+	config.matchers, _ = componentsHasChild[string](h.Data.Components, "matcher")
+	config.startsAt, _ = componentsHasChild[string](h.Data.Components, "startsAt")
+	config.endsAt, _ = componentsHasChild[string](h.Data.Components, "endsAt")
 
 	if b.addOrUpdateSilence(s, h, config) && !messageID.IsZero() {
 		// Remove all of the buttons from the previous message.

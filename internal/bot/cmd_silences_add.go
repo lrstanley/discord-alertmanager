@@ -20,39 +20,80 @@ import (
 	almodels "github.com/prometheus/alertmanager/api/v2/models"
 )
 
-const defaultSilenceDuration = 2 * time.Hour
+const defaultSilenceDuration = 4 * time.Hour
 
 var (
 	reAlertWebhook = regexp.MustCompile(`(?sm)^Alerts (?:Firing|Resolved):\nLabels:\n(.*?)\n(?:Annotations|Source):.*`)
 	reWebhookLabel = regexp.MustCompile(`.*-\s+([^\s=]+)\s+=\s+(.+)`)
 )
 
-type addConfig struct {
-	ID string // Only used when editing.
+// parseSilenceTime parses a silence time from a string. It will first attempt to
+// parse it as a duration, then as a RFC3339 timestamp, otherwise returning an error.
+func parseSilenceTime(input string) (time.Time, error) {
+	if input == "" {
+		return time.Time{}, errors.New("no time provided")
+	}
 
-	Comment  string
-	Matchers string
-	StartsAt string
-	EndsAt   string
+	if strings.EqualFold(input, "now") {
+		return time.Now().Local(), nil
+	}
+
+	d, err := time.ParseDuration(strings.ToLower(input))
+	if err == nil {
+		return time.Now().Local().Add(d), nil
+	}
+
+	t, err := time.Parse(time.RFC3339, input)
+	if err == nil {
+		return t, nil
+	}
+
+	return time.Time{}, errors.New("unable to parse time")
 }
 
-func (m *addConfig) validate() error {
-	if m.Comment == "" {
+type addConfig struct {
+	id string // Only used when editing.
+
+	comment  string
+	matchers string
+	startsAt string
+	endsAt   string
+
+	matchersParsed []*almodels.Matcher
+	startsAtParsed time.Time
+	endsAtParsed   time.Time
+}
+
+func (m *addConfig) validate() (err error) {
+	if m.comment == "" {
 		return errors.New("comment is required")
 	}
 
-	if m.Matchers == "" {
+	if m.matchers == "" {
 		return errors.New("matchers are required")
 	}
 
-	if m.StartsAt == "" {
-		m.StartsAt = "TODO"
-		// return errors.New("startsAt is required")
+	m.matchersParsed, err = alertmanager.ParseLabels(m.matchers, true)
+	if err != nil {
+		return fmt.Errorf("invalid filter/matchers provided: %w", err)
 	}
 
-	if m.EndsAt == "" {
-		m.EndsAt = "TODO"
-		// return errors.New("endsAt is required")
+	if m.startsAt == "" {
+		m.startsAt = "now"
+	}
+
+	m.startsAtParsed, err = parseSilenceTime(m.startsAt)
+	if err != nil {
+		return fmt.Errorf("invalid startsAt provided: %w", err)
+	}
+
+	if m.endsAt == "" {
+		m.endsAt = time.Now().Local().Add(defaultSilenceDuration).Format(time.RFC3339)
+	}
+
+	m.endsAtParsed, err = parseSilenceTime(m.endsAt)
+	if err != nil {
+		return fmt.Errorf("invalid endsAt provided: %w", err)
 	}
 
 	return nil
@@ -64,23 +105,17 @@ func (b *Bot) addOrUpdateSilence(s disgord.Session, h *disgord.InteractionCreate
 		return false
 	}
 
-	matchers, err := alertmanager.ParseLabels(config.Matchers, true)
-	if err != nil {
-		b.responseError(s, h, "Invalid filter/matchers provided", err)
-		return false
-	}
-
 	createParams := &silence.PostSilencesParams{}
 	createParams.SetContext(b.ctx)
 	createParams.SetTimeout(httpRequestTimeout)
 	createParams.SetSilence(&almodels.PostableSilence{
-		ID: config.ID,
+		ID: config.id,
 		Silence: almodels.Silence{
-			Comment:   models.Ptr(config.Comment),
+			Comment:   models.Ptr(config.comment),
 			CreatedBy: models.Ptr(fmt.Sprintf("<@%d> (%s)", h.Member.User.ID, h.Member.User.Username)),
-			Matchers:  matchers,
-			StartsAt:  models.Ptr(strfmt.DateTime(time.Now())), // TODO: swap out to actual input time.
-			EndsAt:    models.Ptr(strfmt.DateTime(time.Now().Add(defaultSilenceDuration))),
+			Matchers:  config.matchersParsed,
+			StartsAt:  models.Ptr(strfmt.DateTime(config.startsAtParsed)),
+			EndsAt:    models.Ptr(strfmt.DateTime(config.endsAtParsed)),
 		},
 	})
 
@@ -104,12 +139,12 @@ func (b *Bot) addOrUpdateSilence(s disgord.Session, h *disgord.InteractionCreate
 
 	silenceEmbed := b.silenceEmbed(s, resp.Payload)
 	silenceEmbed.Color = colorSuccess
-	if config.ID == "" {
+	if config.id == "" {
 		silenceEmbed.Title = fmt.Sprintf("Silence created: %s", *resp.Payload.ID)
 	} else {
 		silenceEmbed.Title = fmt.Sprintf("Silence updated: %s", *resp.Payload.ID)
 		// TODO: may have to remove [%s](%s) depending on if Discord continues to support markdown format.
-		silenceEmbed.Description = fmt.Sprintf("replaces silence: [%s](%s)\n", config.ID, b.al.SilenceURL(config.ID)) + silenceEmbed.Description
+		silenceEmbed.Description = fmt.Sprintf("replaces silence: [%s](%s)\n", config.id, b.al.SilenceURL(config.id)) + silenceEmbed.Description
 	}
 
 	err = s.SendInteractionResponse(b.ctx, h, &disgord.CreateInteractionResponse{
@@ -148,12 +183,12 @@ func (b *Bot) addOrUpdateSilence(s disgord.Session, h *disgord.InteractionCreate
 
 func (b *Bot) silenceAddFromCommand(s disgord.Session, h *disgord.InteractionCreate) {
 	config := &addConfig{}
-	config.Comment, _ = optionsHasChild[string](h.Data.Options, "comment")
-	config.Matchers, _ = optionsHasChild[string](h.Data.Options, "filter")
-	config.StartsAt, _ = optionsHasChild[string](h.Data.Options, "at")
-	config.EndsAt, _ = optionsHasChild[string](h.Data.Options, "until")
+	config.comment, _ = optionsHasChild[string](h.Data.Options, "comment")
+	config.matchers, _ = optionsHasChild[string](h.Data.Options, "filter")
+	config.startsAt, _ = optionsHasChild[string](h.Data.Options, "at")
+	config.endsAt, _ = optionsHasChild[string](h.Data.Options, "until")
 
-	if config.Comment == "" || config.Matchers == "" {
+	if config.comment == "" || config.matchers == "" {
 		b.modalAdd(s, h, "modal-add", "Create silence", config)
 		return
 	}
@@ -195,7 +230,9 @@ func (b *Bot) silenceAddFromMessage(s disgord.Session, h *disgord.InteractionCre
 			}
 
 			b.modalAdd(s, h, "modal-add", "Create silence", &addConfig{
-				Matchers: strings.Join(alertmanager.MatcherToString(matchers, false), "\n"),
+				matchers: strings.Join(alertmanager.MatcherToString(matchers, false), "\n"),
+				startsAt: "now",
+				endsAt:   time.Now().Local().Add(defaultSilenceDuration).Format(time.RFC3339),
 			})
 			return //nolint:staticcheck
 		}
@@ -206,10 +243,10 @@ func (b *Bot) silenceAddFromMessage(s disgord.Session, h *disgord.InteractionCre
 
 func (b *Bot) silenceAddFromModalCallback(s disgord.Session, h *disgord.InteractionCreate, _ string, _ []string) {
 	config := &addConfig{}
-	config.Comment, _ = componentsHasChild[string](h.Data.Components, "comment")
-	config.Matchers, _ = componentsHasChild[string](h.Data.Components, "matcher")
-	config.StartsAt, _ = componentsHasChild[string](h.Data.Components, "startsAt")
-	config.EndsAt, _ = componentsHasChild[string](h.Data.Components, "endsAt")
+	config.comment, _ = componentsHasChild[string](h.Data.Components, "comment")
+	config.matchers, _ = componentsHasChild[string](h.Data.Components, "matcher")
+	config.startsAt, _ = componentsHasChild[string](h.Data.Components, "startsAt")
+	config.endsAt, _ = componentsHasChild[string](h.Data.Components, "endsAt")
 
 	_ = b.addOrUpdateSilence(s, h, config)
 }
@@ -231,7 +268,7 @@ func (b *Bot) modalAdd(s disgord.Session, h *disgord.InteractionCreate, customID
 						CustomID:    "comment",
 						Label:       "Silence comment",
 						Placeholder: "Why are you silencing this alert?",
-						Value:       config.Comment,
+						Value:       config.comment,
 					}},
 				},
 				{
@@ -243,7 +280,7 @@ func (b *Bot) modalAdd(s disgord.Session, h *disgord.InteractionCreate, customID
 						CustomID:    "matcher",
 						Label:       "Silence matcher (multiline/comma-separated)",
 						Placeholder: "key=\"value\"\nkey2!=\"value2\"\nkey3=~\"value[34]\"\netc...",
-						Value:       config.Matchers,
+						Value:       config.matchers,
 					}},
 				},
 				{
@@ -253,9 +290,9 @@ func (b *Bot) modalAdd(s disgord.Session, h *disgord.InteractionCreate, customID
 						Style:       disgord.TextInputStyleShort,
 						Required:    true,
 						CustomID:    "startsAt",
-						Label:       "Starts at",
-						Placeholder: "TODO",
-						Value:       config.StartsAt,
+						Label:       "Starts at (RFC3339 or 1h30m, -1h30m, etc)",
+						Placeholder: "RFC3339 or 1h30m, -1h30m, etc",
+						Value:       config.startsAt,
 					}},
 				},
 				{
@@ -265,9 +302,9 @@ func (b *Bot) modalAdd(s disgord.Session, h *disgord.InteractionCreate, customID
 						Style:       disgord.TextInputStyleShort,
 						Required:    true,
 						CustomID:    "endsAt",
-						Label:       "Ends at",
-						Placeholder: "TODO",
-						Value:       config.EndsAt,
+						Label:       "Ends at (RFC3339 or 1h30m, -1h30m, etc)",
+						Placeholder: "RFC3339 or 1h30m, -1h30m, etc",
+						Value:       config.endsAt,
 					}},
 				},
 			},
