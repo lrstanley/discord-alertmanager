@@ -1,7 +1,13 @@
+<!-- template:define:options
+{
+  "nodescription": true
+}
+-->
+![logo](https://liam.sh/-/gh/svg/lrstanley/discord-alertmanager?icon=logos%3Aprometheus&icon.height=80&bg=topography&layout=left)
+
 <!-- template:begin:header -->
 <!-- do not edit anything in this "template" block, its auto-generated -->
 
-<p align="center">discord-alertmanager -- daemon for removing torrents from deluge after a specified timeframe</p>
 <p align="center">
   <a href="https://github.com/lrstanley/discord-alertmanager/tags">
     <img title="Latest Semver Tag" src="https://img.shields.io/github/v/tag/lrstanley/discord-alertmanager?style=flat-square">
