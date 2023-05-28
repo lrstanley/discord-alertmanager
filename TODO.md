@@ -1,0 +1,4 @@
+- create
+  - button to open in alertmanager (duplicate?)
+- pass a retryFunc to responseError, that will be invoked if the user clicks?
+- message components (when not via command), allow non-admin roles to use?
