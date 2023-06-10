@@ -57,6 +57,7 @@
 
   - [Why](#grey_question-why)
   - [Installation](#computer-installation)
+    - [Container Images (ghcr)](#whale-container-images-ghcr)
     - [Source](#toolbox-source)
   - [Usage](#gear-usage)
     - [Slash Commands](#green_book-slash-commands)
@@ -82,7 +83,12 @@ page for prebuilt versions.
 
 <!-- template:begin:ghcr -->
 <!-- do not edit anything in this "template" block, its auto-generated -->
+### :whale: Container Images (ghcr)
 
+```console
+$ docker run -it --rm ghcr.io/lrstanley/discord-alertmanager:master
+$ docker run -it --rm ghcr.io/lrstanley/discord-alertmanager:latest
+```
 <!-- template:end:ghcr -->
 
 ### :toolbox: Source
