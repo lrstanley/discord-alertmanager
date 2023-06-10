@@ -86,8 +86,9 @@ page for prebuilt versions.
 ### :whale: Container Images (ghcr)
 
 ```console
-$ docker run -it --rm ghcr.io/lrstanley/discord-alertmanager:master
+$ docker run -it --rm ghcr.io/lrstanley/discord-alertmanager:1.0.0
 $ docker run -it --rm ghcr.io/lrstanley/discord-alertmanager:latest
+$ docker run -it --rm ghcr.io/lrstanley/discord-alertmanager:master
 ```
 <!-- template:end:ghcr -->
 
