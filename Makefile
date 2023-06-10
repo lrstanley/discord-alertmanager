@@ -38,7 +38,7 @@ go-upgrade-deps-patch:
 
 go-prepare: go-fetch
 	go generate -x ./...
-	{ echo '## :gear: Usage'; go run ${PACKAGE} --generate-markdown; } > USAGE.md
+	{ echo '## :gear: Usage'; go run ${PACKAGE} --generate-markdown --alertmanager.url "http://localhost:9093" --discord.token "123"; } > USAGE.md
 
 go-dlv: go-prepare
 	dlv debug \
