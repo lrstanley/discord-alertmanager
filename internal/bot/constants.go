@@ -26,6 +26,18 @@ var commands = []*disgord.CreateApplicationCommand{
 		DefaultMemberPermissions: models.Ptr(disgord.PermissionBit(0)),
 	},
 	{
+		Name:                     "edit silence",
+		Type:                     disgord.ApplicationCommandMessage,
+		DMPermission:             models.Ptr(false),
+		DefaultMemberPermissions: models.Ptr(disgord.PermissionBit(0)),
+	},
+	{
+		Name:                     "remove silence",
+		Type:                     disgord.ApplicationCommandMessage,
+		DMPermission:             models.Ptr(false),
+		DefaultMemberPermissions: models.Ptr(disgord.PermissionBit(0)),
+	},
+	{
 		Name:        "silences",
 		Description: "Manage alert silences",
 		// Disallow DMs, which might bypass Discords default permission checks.

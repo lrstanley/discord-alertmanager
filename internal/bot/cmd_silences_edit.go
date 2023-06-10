@@ -5,6 +5,7 @@
 package bot
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -12,27 +13,28 @@ import (
 	"github.com/andersfylling/disgord"
 	"github.com/go-openapi/strfmt"
 	"github.com/lrstanley/discord-alertmanager/internal/alertmanager"
-	"github.com/lrstanley/discord-alertmanager/internal/models"
 	"github.com/prometheus/alertmanager/api/v2/client/silence"
 )
 
-func (b *Bot) silenceEditFromCallback(s disgord.Session, h *disgord.InteractionCreate, _ string, args []string) {
-	if len(args) < 1 {
+func (b *Bot) silenceEditFromMessage(s disgord.Session, h *disgord.InteractionCreate) {
+	id := interactionHasSilence(h.Data)
+	if id == "" {
+		b.responseError(s, h, "No silence found", errors.New("no silence found in provided message"))
 		return
 	}
 
 	getParams := &silence.GetSilenceParams{}
 	getParams.SetContext(b.ctx)
 	getParams.SetTimeout(httpRequestTimeout)
-	getParams.SetSilenceID(strfmt.UUID(args[0]))
+	getParams.SetSilenceID(strfmt.UUID(id))
 	resp, err := b.al.Silence.GetSilence(getParams, b.al.HandleAuth)
 	if err != nil {
 		b.responseError(s, h, "An error occurred while fetching silence", err)
 		return
 	}
 
-	b.modalAdd(s, h, fmt.Sprintf("modal-edit/%s/%d", args[0], h.Message.ID), "Update silence", &addConfig{
-		id:       args[0],
+	b.modalAdd(s, h, fmt.Sprintf("modal-edit/%s", id), "Update silence", &addConfig{
+		id:       id,
 		comment:  *resp.Payload.Comment,
 		matchers: strings.Join(alertmanager.MatcherToString(resp.Payload.Matchers, false), "\n"),
 		startsAt: time.Until(time.Time(*resp.Payload.StartsAt)).Round(time.Minute).String(),
@@ -98,11 +100,6 @@ func (b *Bot) silenceEditFromModalCallback(s disgord.Session, h *disgord.Interac
 		return
 	}
 
-	var messageID disgord.Snowflake
-	if len(args) > 1 {
-		messageID = disgord.ParseSnowflakeString(args[1])
-	}
-
 	config := &addConfig{}
 	config.id = args[0]
 	config.comment, _ = componentsHasChild[string](h.Data.Components, "comment")
@@ -110,13 +107,5 @@ func (b *Bot) silenceEditFromModalCallback(s disgord.Session, h *disgord.Interac
 	config.startsAt, _ = componentsHasChild[string](h.Data.Components, "startsAt")
 	config.endsAt, _ = componentsHasChild[string](h.Data.Components, "endsAt")
 
-	if b.addOrUpdateSilence(s, h, config) && !messageID.IsZero() {
-		// Remove all of the buttons from the previous message.
-		_, err := b.client.Channel(h.ChannelID).Message(messageID).Update(&disgord.UpdateMessage{
-			Components: models.Ptr([]*disgord.MessageComponent{}),
-		})
-		if err != nil {
-			b.logger.WithError(err).Error("failed to update message")
-		}
-	}
+	_ = b.addOrUpdateSilence(s, h, config)
 }

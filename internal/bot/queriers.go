@@ -6,11 +6,53 @@ package bot
 
 import (
 	"errors"
+	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/andersfylling/disgord"
 )
+
+var reSilenceID = regexp.MustCompile(`\b[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\b`)
+
+// interactionHasSilence searches through the interaction's resolved messages and
+// embeds for a silence ID. If found, it returns the ID, otherwise an empty string.
+func interactionHasSilence(data *disgord.ApplicationCommandInteractionData) (id string) {
+	fn := func(inputs ...string) string {
+		for _, input := range inputs {
+			match := reSilenceID.FindString(input)
+			if match == "" {
+				continue
+			}
+
+			return match
+		}
+
+		return ""
+	}
+
+	for _, msg := range data.Resolved.Messages {
+		if id = fn(msg.Content); id != "" {
+			return id
+		}
+
+		for _, embed := range msg.Embeds {
+			if id = fn(embed.Title, embed.Description, embed.URL); id != "" {
+				return id
+			}
+
+			for _, field := range embed.Fields {
+				if id = fn(field.Name, field.Value); id != "" {
+					return id
+				}
+			}
+		}
+
+		// Don't check components for now.
+	}
+
+	return ""
+}
 
 // optionsHasChild recursively searches through application command options (and it's children)
 // for an option with the given name. If found, it returns the option's value and true.

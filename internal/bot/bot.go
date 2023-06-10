@@ -130,17 +130,17 @@ func (b *Bot) onInteractionCreate(s disgord.Session, h *disgord.InteractionCreat
 	case "modal-edit":
 		b.silenceEditFromModalCallback(s, h, customID, args)
 		return
-	case "silence-edit":
-		b.silenceEditFromCallback(s, h, customID, args)
-		return
-	case "silence-remove":
-		b.silenceRemoveFromCallback(s, h, customID, args)
-		return
 	}
 
 	switch h.Data.Name {
 	case "silence alert": // Message commands.
 		b.silenceAddFromMessage(s, h)
+		return
+	case "edit silence": // Message commands.
+		b.silenceEditFromMessage(s, h)
+		return
+	case "remove silence": // Message commands.
+		b.silenceRemoveFromMessage(s, h)
 		return
 	case "silences": // Application commands.
 		switch h.Data.Options[0].Name {

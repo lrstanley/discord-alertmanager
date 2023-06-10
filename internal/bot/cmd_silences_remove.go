@@ -62,22 +62,14 @@ func (b *Bot) silenceRemove(s disgord.Session, h *disgord.InteractionCreate, id 
 	return true
 }
 
-func (b *Bot) silenceRemoveFromCallback(s disgord.Session, h *disgord.InteractionCreate, _ string, args []string) {
-	if len(args) < 1 {
+func (b *Bot) silenceRemoveFromMessage(s disgord.Session, h *disgord.InteractionCreate) {
+	id := interactionHasSilence(h.Data)
+	if id == "" {
+		b.responseError(s, h, "No silence found", errors.New("no silence found in provided message"))
 		return
 	}
 
-	if b.silenceRemove(s, h, args[0]) {
-		if updateButtonComponent(h.Message.Components, h.Data.CustomID, "removed", disgord.Danger, true) {
-			_, err := b.client.Channel(h.ChannelID).Message(h.Message.ID).Update(&disgord.UpdateMessage{
-				Components: &h.Message.Components,
-			})
-			if err != nil {
-				b.logger.WithError(err).Error("failed to update message")
-				return
-			}
-		}
-	}
+	_ = b.silenceRemove(s, h, id)
 }
 
 func (b *Bot) silenceRemoveFromCommand(s disgord.Session, h *disgord.InteractionCreate) {

@@ -36,25 +36,6 @@ func (b *Bot) silenceGetFromCommand(s disgord.Session, h *disgord.InteractionCre
 		Data: &disgord.CreateInteractionResponseData{
 			Flags:  disgord.MessageFlagEphemeral,
 			Embeds: []*disgord.Embed{b.silenceEmbed(s, resp.Payload)},
-			Components: []*disgord.MessageComponent{{
-				Type: disgord.MessageComponentActionRow,
-				Components: []*disgord.MessageComponent{
-					{
-						Type:     disgord.MessageComponentButton,
-						Label:    "edit",
-						Style:    disgord.Primary,
-						CustomID: fmt.Sprintf("silence-edit/%s", id),
-						Disabled: false,
-					},
-					{
-						Type:     disgord.MessageComponentButton,
-						Label:    "remove",
-						Style:    disgord.Danger,
-						CustomID: fmt.Sprintf("silence-remove/%s", id),
-						Disabled: false,
-					},
-				},
-			}},
 		},
 	})
 	if err != nil {

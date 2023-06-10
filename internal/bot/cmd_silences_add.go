@@ -143,7 +143,6 @@ func (b *Bot) addOrUpdateSilence(s disgord.Session, h *disgord.InteractionCreate
 		silenceEmbed.Title = fmt.Sprintf("Silence created: %s", *resp.Payload.ID)
 	} else {
 		silenceEmbed.Title = fmt.Sprintf("Silence updated: %s", *resp.Payload.ID)
-		// TODO: may have to remove [%s](%s) depending on if Discord continues to support markdown format.
 		silenceEmbed.Description = fmt.Sprintf("replaces silence: [%s](%s)\n", config.id, b.al.SilenceURL(config.id)) + silenceEmbed.Description
 	}
 
@@ -152,25 +151,6 @@ func (b *Bot) addOrUpdateSilence(s disgord.Session, h *disgord.InteractionCreate
 		Data: &disgord.CreateInteractionResponseData{
 			AllowedMentions: &disgord.AllowedMentions{Parse: []string{"users"}},
 			Embeds:          []*disgord.Embed{silenceEmbed},
-			Components: []*disgord.MessageComponent{{
-				Type: disgord.MessageComponentActionRow,
-				Components: []*disgord.MessageComponent{
-					{
-						Type:     disgord.MessageComponentButton,
-						Label:    "edit",
-						Style:    disgord.Primary,
-						CustomID: fmt.Sprintf("silence-edit/%s", createResp.Payload.SilenceID),
-						Disabled: false,
-					},
-					{
-						Type:     disgord.MessageComponentButton,
-						Label:    "remove",
-						Style:    disgord.Danger,
-						CustomID: fmt.Sprintf("silence-remove/%s", createResp.Payload.SilenceID),
-						Disabled: false,
-					},
-				},
-			}},
 		},
 	})
 	if err != nil {
