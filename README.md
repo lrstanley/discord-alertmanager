@@ -16,6 +16,9 @@
     <img title="Last commit" src="https://img.shields.io/github/last-commit/lrstanley/discord-alertmanager?style=flat-square">
   </a>
 
+
+
+
   <a href="https://github.com/lrstanley/discord-alertmanager/actions?query=workflow%3Atest+event%3Apush">
     <img title="GitHub Workflow Status (test @ master)" src="https://img.shields.io/github/actions/workflow/status/lrstanley/discord-alertmanager/test.yml?branch=master&label=test&style=flat-square">
   </a>
@@ -52,13 +55,15 @@
 <!-- do not edit anything in this "template" block, its auto-generated -->
 ## :link: Table of Contents
 
-- [Why](#grey_question-why)
-- [Installation](#computer-installation)
-  - [Source](#toolbox-source)
-- [Usage](#gear-usage)
-- [Support &amp; Assistance](#raising_hand_man-support--assistance)
-- [Contributing](#handshake-contributing)
-- [License](#balance_scale-license)
+  - [Why](#grey_question-why)
+  - [Installation](#computer-installation)
+    - [Source](#toolbox-source)
+  - [Usage](#gear-usage)
+    - [Slash Commands](#green_book-slash-commands)
+    - [Message Commands](#speech_balloon-message-commands)
+  - [Support &amp; Assistance](#raising_hand_man-support--assistance)
+  - [Contributing](#handshake-contributing)
+  - [License](#balance_scale-license)
 <!-- template:end:toc -->
 
 ## :grey_question: Why
@@ -129,24 +134,24 @@ Or remove it:
 <!-- do not edit anything in this "template" block, its auto-generated -->
 ## :raising_hand_man: Support & Assistance
 
-- :heart: Please review the [Code of Conduct](.github/CODE_OF_CONDUCT.md) for
+* :heart: Please review the [Code of Conduct](.github/CODE_OF_CONDUCT.md) for
      guidelines on ensuring everyone has the best experience interacting with
      the community.
-- :raising_hand_man: Take a look at the [support](.github/SUPPORT.md) document on
+* :raising_hand_man: Take a look at the [support](.github/SUPPORT.md) document on
      guidelines for tips on how to ask the right questions.
-- :lady_beetle: For all features/bugs/issues/questions/etc, [head over here](https://github.com/lrstanley/discord-alertmanager/issues/new/choose).
+* :lady_beetle: For all features/bugs/issues/questions/etc, [head over here](https://github.com/lrstanley/discord-alertmanager/issues/new/choose).
 <!-- template:end:support -->
 
 <!-- template:begin:contributing -->
 <!-- do not edit anything in this "template" block, its auto-generated -->
 ## :handshake: Contributing
 
-- :heart: Please review the [Code of Conduct](.github/CODE_OF_CONDUCT.md) for guidelines
+* :heart: Please review the [Code of Conduct](.github/CODE_OF_CONDUCT.md) for guidelines
      on ensuring everyone has the best experience interacting with the
     community.
-- :clipboard: Please review the [contributing](.github/CONTRIBUTING.md) doc for submitting
+* :clipboard: Please review the [contributing](.github/CONTRIBUTING.md) doc for submitting
      issues/a guide on submitting pull requests and helping out.
-- :old_key: For anything security related, please review this repositories [security policy](https://github.com/lrstanley/discord-alertmanager/security/policy).
+* :old_key: For anything security related, please review this repositories [security policy](https://github.com/lrstanley/discord-alertmanager/security/policy).
 <!-- template:end:contributing -->
 
 <!-- template:begin:license -->
