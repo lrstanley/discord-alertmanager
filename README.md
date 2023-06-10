@@ -16,9 +16,6 @@
     <img title="Last commit" src="https://img.shields.io/github/last-commit/lrstanley/discord-alertmanager?style=flat-square">
   </a>
 
-
-
-
   <a href="https://github.com/lrstanley/discord-alertmanager/actions?query=workflow%3Atest+event%3Apush">
     <img title="GitHub Workflow Status (test @ master)" src="https://img.shields.io/github/actions/workflow/status/lrstanley/discord-alertmanager/test.yml?branch=master&label=test&style=flat-square">
   </a>
@@ -55,18 +52,23 @@
 <!-- do not edit anything in this "template" block, its auto-generated -->
 ## :link: Table of Contents
 
-  - [Why](#grey_question-why)
-  - [Installation](#computer-installation)
-    - [Source](#toolbox-source)
-  - [Usage](#gear-usage)
-  - [Support &amp; Assistance](#raising_hand_man-support--assistance)
-  - [Contributing](#handshake-contributing)
-  - [License](#balance_scale-license)
+- [Why](#grey_question-why)
+- [Installation](#computer-installation)
+  - [Source](#toolbox-source)
+- [Usage](#gear-usage)
+- [Support &amp; Assistance](#raising_hand_man-support--assistance)
+- [Contributing](#handshake-contributing)
+- [License](#balance_scale-license)
 <!-- template:end:toc -->
 
 ## :grey_question: Why
 
-TODO
+I utilize the direct integration between **AlertManager** and **Discord**, via webhooks. I also
+wanted a way of managing my silences directly from the same channels where those alerts were
+being posted, thus why I created this bot. The bot allows you to both manage silences directly
+via Discords [slash commands](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ),
+as well as interact with AlertManagers webhook messages, to silence specific alerts,
+pre-configuring the silence with content from that specific alert.
 
 ## :computer: Installation
 
@@ -92,28 +94,59 @@ Take a look at the [docker-compose.yaml](/docker-compose.yaml) file, or the abov
 docker run commands. For references on supported flags/environment variables,
 take a look at [USAGE.md](/USAGE.md)
 
+### :green_book: Slash Commands
+
+You can utilize Discords [slash commands](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ),
+and `add`, `get`, `edit`, `list`, and `remove` silences:
+
+Full list of commands:
+
+![slash commands](https://cdn.liam.sh/share/2023/06/Discord_lwhrUPJClx.png)
+
+Example for fetching a specific silence:
+
+![/silences get id](https://cdn.liam.sh/share/2023/06/Discord_AjvCN7Pe4b.gif)
+
+Example for listing all active silences:
+
+![/silences list](https://cdn.liam.sh/share/2023/06/Discord_yjcapcwsMp.gif)
+
+### :speech_balloon: Message Commands
+
+You can right click AlertManager webhook events, and add a silence:
+
+![silence alert from webhook](https://cdn.liam.sh/share/2023/06/Discord_9zJVqHDfvg.gif)
+
+You can right click a silence, and update it:
+
+![edit silence](https://cdn.liam.sh/share/2023/06/Discord_oZx5NCaeWA.gif)
+
+Or remove it:
+
+![remove silence](https://cdn.liam.sh/share/2023/06/Discord_oqByuoYFUI.gif)
+
 <!-- template:begin:support -->
 <!-- do not edit anything in this "template" block, its auto-generated -->
 ## :raising_hand_man: Support & Assistance
 
-* :heart: Please review the [Code of Conduct](.github/CODE_OF_CONDUCT.md) for
+- :heart: Please review the [Code of Conduct](.github/CODE_OF_CONDUCT.md) for
      guidelines on ensuring everyone has the best experience interacting with
      the community.
-* :raising_hand_man: Take a look at the [support](.github/SUPPORT.md) document on
+- :raising_hand_man: Take a look at the [support](.github/SUPPORT.md) document on
      guidelines for tips on how to ask the right questions.
-* :lady_beetle: For all features/bugs/issues/questions/etc, [head over here](https://github.com/lrstanley/discord-alertmanager/issues/new/choose).
+- :lady_beetle: For all features/bugs/issues/questions/etc, [head over here](https://github.com/lrstanley/discord-alertmanager/issues/new/choose).
 <!-- template:end:support -->
 
 <!-- template:begin:contributing -->
 <!-- do not edit anything in this "template" block, its auto-generated -->
 ## :handshake: Contributing
 
-* :heart: Please review the [Code of Conduct](.github/CODE_OF_CONDUCT.md) for guidelines
+- :heart: Please review the [Code of Conduct](.github/CODE_OF_CONDUCT.md) for guidelines
      on ensuring everyone has the best experience interacting with the
     community.
-* :clipboard: Please review the [contributing](.github/CONTRIBUTING.md) doc for submitting
+- :clipboard: Please review the [contributing](.github/CONTRIBUTING.md) doc for submitting
      issues/a guide on submitting pull requests and helping out.
-* :old_key: For anything security related, please review this repositories [security policy](https://github.com/lrstanley/discord-alertmanager/security/policy).
+- :old_key: For anything security related, please review this repositories [security policy](https://github.com/lrstanley/discord-alertmanager/security/policy).
 <!-- template:end:contributing -->
 
 <!-- template:begin:license -->
