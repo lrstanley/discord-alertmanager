@@ -102,9 +102,10 @@ Note that you must have [Go](https://golang.org/doc/install) installed (latest i
 
 ## :gear: Usage
 
-Take a look at the [docker-compose.yaml](/docker-compose.yaml) file, or the above
-docker run commands. For references on supported flags/environment variables,
-take a look at [USAGE.md](/USAGE.md)
+Take a look at the [docker-compose.yaml](/docker-compose.yaml) file,
+[helm chart](https://github.com/lrstanley/helm-charts/tree/master/charts/discord-alertmanager),
+or the above docker run commands. For references on supported flags/environment
+variables, take a look at [USAGE.md](/USAGE.md).
 
 ### :green_book: Slash Commands
 
