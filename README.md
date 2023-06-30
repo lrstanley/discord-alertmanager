@@ -55,12 +55,12 @@
 <!-- do not edit anything in this "template" block, its auto-generated -->
 ## :link: Table of Contents
 
-  - [Why](#grey_question-why)
-  - [Installation](#computer-installation)
-    - [Container Images (ghcr)](#whale-container-images-ghcr)
+  - [❔ Why](#grey_question-why)
+  - [💻 Installation](#computer-installation)
+    - [🐳 Container Images (ghcr)](#whale-container-images-ghcr)
     - [Source](#toolbox-source)
   - [Usage](#gear-usage)
-    - [Slash Commands](#green_book-slash-commands)
+    - [📗 Slash Commands](#green_book-slash-commands)
     - [Message Commands](#speech_balloon-message-commands)
   - [Support &amp; Assistance](#raising_hand_man-support--assistance)
   - [Contributing](#handshake-contributing)
