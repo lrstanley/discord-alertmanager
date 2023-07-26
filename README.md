@@ -55,16 +55,16 @@
 <!-- do not edit anything in this "template" block, its auto-generated -->
 ## :link: Table of Contents
 
-  - [Why](#grey_question-why)
-  - [💻 Installation](#computer-installation)
+  - [❔ Why](#grey_question-why)
+  - [Installation](#computer-installation)
     - [🐳 Container Images (ghcr)](#whale-container-images-ghcr)
-    - [Source](#toolbox-source)
-  - [Usage](#gear-usage)
+    - [🧰 Source](#toolbox-source)
+  - [⚙️ Usage](#gear-usage)
     - [📗 Slash Commands](#green_book-slash-commands)
     - [Message Commands](#speech_balloon-message-commands)
   - [Support &amp; Assistance](#raising_hand_man-support--assistance)
   - [Contributing](#handshake-contributing)
-  - [⚖️ License](#balance_scale-license)
+  - [License](#balance_scale-license)
 <!-- template:end:toc -->
 
 ## :grey_question: Why
