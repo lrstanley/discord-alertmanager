@@ -59,11 +59,11 @@
   - [Installation](#computer-installation)
     - [🐳 Container Images (ghcr)](#whale-container-images-ghcr)
     - [Source](#toolbox-source)
-  - [⚙️ Usage](#gear-usage)
+  - [Usage](#gear-usage)
     - [Slash Commands](#green_book-slash-commands)
-    - [💬 Message Commands](#speech_balloon-message-commands)
+    - [Message Commands](#speech_balloon-message-commands)
   - [Support &amp; Assistance](#raising_hand_man-support--assistance)
-  - [🤝 Contributing](#handshake-contributing)
+  - [Contributing](#handshake-contributing)
   - [License](#balance_scale-license)
 <!-- template:end:toc -->
 
