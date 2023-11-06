@@ -3,7 +3,7 @@ module github.com/lrstanley/discord-alertmanager
 go 1.20
 
 require (
-	github.com/alecthomas/participle/v2 v2.0.0
+	github.com/alecthomas/participle/v2 v2.1.0
 	github.com/andersfylling/disgord v0.36.2
 	github.com/apex/log v1.9.0
 	github.com/go-openapi/runtime v0.26.0
