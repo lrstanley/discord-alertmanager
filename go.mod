@@ -7,7 +7,7 @@ require (
 	github.com/andersfylling/disgord v0.36.2
 	github.com/apex/log v1.9.0
 	github.com/go-openapi/runtime v0.26.0
-	github.com/go-openapi/strfmt v0.21.7
+	github.com/go-openapi/strfmt v0.21.8
 	github.com/joho/godotenv v1.5.1
 	github.com/kr/pretty v0.3.1
 	github.com/lrstanley/clix v1.0.0
