@@ -8,7 +8,7 @@ COPY . /build/
 RUN make
 
 # runtime image
-FROM alpine:3.18
+FROM alpine:3.19
 COPY --from=build /build/discord-alertmanager /usr/local/bin/discord-alertmanager
 
 # runtime params
