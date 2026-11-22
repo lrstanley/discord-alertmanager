@@ -8,7 +8,5 @@ on:
 jobs:
   docker-release:
     uses: lrstanley/.github/.github/workflows/docker-release.yml@master
-    secrets:
-      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     with:
       scan: false

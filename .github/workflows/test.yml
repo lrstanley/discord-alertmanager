@@ -16,10 +16,6 @@ jobs:
       go-version: latest
   go-lint:
     uses: lrstanley/.github/.github/workflows/lang-go-lint.yml@master
-    secrets:
-      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
   docker-test:
     needs: [go-test, go-lint]
     uses: lrstanley/.github/.github/workflows/docker-release.yml@master
-    secrets:
-      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
